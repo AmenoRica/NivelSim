@@ -43,11 +43,11 @@ function cardPosToStr(cardPos) {
             return `데미지 존`
         case 'trash':
             return `트래시 존`
-        case 'equip1':
+        case 'equip0':
             return '1열 유닛의 장비'
-        case 'equip2':
+        case 'equip1':
             return '2열 유닛의 장비'
-        case 'equip3':
+        case 'equip2':
             return '3열 유닛의 장비'
     }
 }
@@ -274,6 +274,12 @@ function initGame() {
         cardsUI.showModal()
         document.querySelector('.cards').scrollLeft = 0
     })
+    cardViews.enemy.unit.forEach((v, k) => {
+        v.querySelector('.equip').addEventListener('click', (e) => {
+            e.stopPropagation()
+            viewEquip(`e-equip${k}`)
+        })
+    })
 
     cardViews.player.deck.addEventListener('click', (e) => { popup("본인 덱 " + game.player.deck.length + "장 남음") })
     cardViews.player.trash.addEventListener('click', (e) => {
@@ -301,6 +307,22 @@ function initGame() {
         v.querySelector('.equip').addEventListener('click', (e) => {
             e.stopPropagation()
             viewEquip(`p-equip${k}`)
+        })
+    })
+    cardViews.player.unit.forEach((v, k) => {
+        v.querySelector('.atk').addEventListener('click', (e) => {
+            e.stopPropagation()
+            sendChat(`유닛 존 ${k + 1}의 ${eeGa(getCardData(v.getAttribute("cardid")).name)} 공격 선언`)
+            popup(`유닛 존 ${k + 1}에서 공격 선언`)
+            sendPopup(`상대가 유닛 존 ${k + 1}에서 공격 선언`)
+        })
+    })
+    cardViews.player.unit.forEach((v, k) => {
+        v.querySelector('.def').addEventListener('click', (e) => {
+            e.stopPropagation()
+            sendChat(`유닛 존 ${k + 1}의 ${eeGa(getCardData(v.getAttribute("cardid")).name)} 방어 선언`)
+            popup(`유닛 존 ${k + 1}에서 방어 선언`)
+            sendPopup(`상대가 유닛 존 ${k + 1}에서 방어 선언`)
         })
     })
 }
@@ -475,6 +497,42 @@ function moveCardTo(cardPos, cardDest, isTop) {
     return true;
 }
 
+function sunhu(){
+    const s = Math.random() < 0.5
+    popup(s ? "선공입니다" : "후공입니다")
+    sendPopup(s ? "후공입니다" : "선공입니다")
+
+    chatBox.value += "\n" + "나: " + (s ? "선공입니다" : "후공입니다");
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (gConn == "noConn") return;
+    gConn.send("CH" + (s ? "당신이 후공입니다" : "당신이 선공입니다"))
+}
+function mul(){
+    game.player.deck = game.player.deck.concat(game.player.hand)
+    game.player.hand = []
+
+    let currentIndex = game.player.deck.length;
+
+    while (currentIndex != 0) {
+        let randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [game.player.deck[currentIndex], game.player.deck[randomIndex]] = [
+            game.player.deck[randomIndex], game.player.deck[currentIndex]];
+    }
+    game.player.hand.push(game.player.deck.shift())
+    game.player.hand.push(game.player.deck.shift())
+    game.player.hand.push(game.player.deck.shift())
+    game.player.hand.push(game.player.deck.shift())
+    sendChat("멀리건했습니다.")
+    sendGame()
+    applyGame()
+}
+function turnEnd(){
+    sendChat("턴을 마칩니다.")
+    popup("상대가 턴을 마쳤습니다.")
+}
+
 function moveCurTo(cardDest, isTop) {
     const card = cardInfoView.getAttribute("cardID")
     const pos = cardInfoView.getAttribute("cardPos")
@@ -599,7 +657,8 @@ function sendChat(chatText) {
     gConn.send("CH" + chatText)
 }
 function sendPopup(popupText) {
-    popup(text)
+    if (gConn == "noConn") return;
+    gConn.send("PO" + popupText)
 }
 function initConn(conn) {
     conn.on('data', function (data) {
@@ -628,7 +687,7 @@ document.getElementById('chatui').onsubmit = function () {
         });
         */
     } else {
-        gConn.send("CH" + data);
+        sendChat(data)
     }
     return false
 }

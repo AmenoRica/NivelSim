@@ -134,16 +134,19 @@
             <div class="toolbar">
                 <button onclick="draw()">드로우</button>
                 <button onclick="lvUp()">레벨+</button>
-                <button onclick="awake()">각성 토글</button>
+                <button onclick="awake()">각성</button>
                 <button onclick="deckTop()">덱탑</button>
                 <button onclick="shuffle()">셔플</button>
+                <button onclick="turnEnd()">턴종</button>
+                <button onclick="if(confirm('정말 나갈래요?')) location.href = '/'">나가기</button>
             </div>
             <div class="toolbar">
                 <button onclick="viewDeck()">덱 보기</button>
                 <button onclick="chooseDeck()">덱 선택</button>
+                <button onclick="sunhu()">선후</button>
+                <button onclick="mul()">멀리건</button>
                 <button id="openRoom" disabled>방 열기</button>
                 <button id="joinRoom" disabled>연결하기</button>
-                <button onclick="if(confirm('정말 나갈래요?')) location.href = '/'">나가기</button>
             </div>
             <textarea id="chatBox" readonly></textarea>
             <form id="chatui">

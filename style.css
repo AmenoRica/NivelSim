@@ -308,6 +308,7 @@ select {
 
 .toolbar > button{
     flex-shrink: 0;
+    font-size: medium;
 }
 
 #chatBox {
