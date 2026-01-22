@@ -687,6 +687,7 @@ document.getElementById('chatui').onsubmit = function () {
         });
         */
     } else {
+        this.text.value = ""
         sendChat(data)
     }
     return false
