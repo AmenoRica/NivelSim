@@ -155,7 +155,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 1dvh;
-    gap: 10px;
+    gap: 5px;
     height: 98dvh;
     width: 48vh;
     align-items: center;
