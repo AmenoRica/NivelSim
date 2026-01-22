@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>니벨sim 덱 빌더</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        #deckList .cardView {
+            width: 10vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game" style="gap: 1vh; justify-content: start;">
+        <div id="deckName">덱을 불러오거나, 덱을 만들고 나서 "다른 이름으로 저장" 하세요</div>
+        <div id="leader" class="cardView" style="width: 10vh;"></div>
+        <div id="deckList" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%;"></div>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <button onclick="findCards(prompt('찾을 카드 이름을 입력하세요',''))">카드 추가하기</button>
+        </div>
+        <div>
+            <button onclick="chooseDeck()">덱 불러오기</button>
+            <button onclick="curDeck.deck.sort(); updateBuilder()">정렬</button>
+            <button onclick="saveAs(curDeck.name)">저장</button>
+            <button onclick="saveAs(prompt('덱 이름을 입력하세요', 'noName'))">다른 이름으로 저장</button>
+            <button onclick="deleteDeck()">삭제</button>
+        </div>
+        <div>
+            <button onclick="importerUI.showModal()">외부로 덱 불러오기/내보내기</button>
+            <button onclick="if(confirm('정말 나갈래요?')) location.href = '/'">나가기</button>
+        </div>
+    </div>
+    <dialog id="deckSelectUI" closedby="any">
+        <select id="deckSelector"></select>
+        <div>
+            <button onclick="setDeck()">덱 선택하기</button>
+            <button onclick="deckSelectUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog class="cardInfoUI" closedby="any">
+        <div class="cardView">
+        </div>
+        <div class="buttons">
+            <button onclick="addCard()">덱에 넣기</button>
+            <button onclick="removeCard()">덱에서 빼기</button>
+            <button onclick="curDeck.leader =cardInfoView.getAttribute('cardID');updateBuilder()">리더로 설정</button>
+            <button onclick="cardInfoUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog class="cardsui" closedby="any">
+        <div class="cards">
+        </div>
+        <div class="buttons">
+            <button onclick="cardsUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog id="importerUI" closedby="any">
+        <textarea id="importerText" style="width: 30vh; height: 50vh;">
+        </textarea>
+        <div class="buttons">
+            <button onclick="importDeck()">불러오기</button>
+            <button onclick="exportDeck()">내보내기</button>
+            <button onclick="importerUI.close()">닫기</button>
+        </div>
+    </dialog>
+
+    <script src="cardDB.js"></script>
+    <script>
+        const importerUI = document.getElementById('importerUI')
+        const importerText = document.getElementById('importerText')
+        function importDeck() {
+            try {
+                curDeck = JSON.parse(importerText.value)
+                updateBuilder()
+                importerUI.close()
+            } catch {
+                alert("덱에 문제가 있어 불러오는 데에 실패했습니다.")
+            }
+        }
+        function exportDeck() {
+            importerText.value = JSON.stringify(curDeck, null, 2);
+        }
+
+        const storage = window.localStorage;
+        let deckNames = JSON.parse(storage.getItem("deckNames"));
+        if (deckNames == null) {
+            storage.setItem("deckNames", "[]")
+            deckNames = []
+        }
+
+        const cardsUI = document.querySelector('.cardsui')
+        const cardsView = document.querySelector('.cardsui .cards')
+        function findCards(name) {
+            const found = []
+
+            let cardDB = JSON.parse(storage.getItem("cardDB"));
+            function getCardData(cardID) {
+                if (cardDB[cardID]) {
+                    return cardDB[cardID]
+                } else {
+                    cardDB = json.parse(storage.getItem("cardDB"));
+                    return getCardData(cardID)
+                }
+            }
+
+            for (const [key, value] of Object.entries(cardDB)) {
+                if (value.name.includes(name)) found.push(key)
+            }
+            while (cardsView.firstChild) {
+                cardsView.removeChild(cardsView.firstChild)
+            }
+            for (i = 0; i < found.length; i++) {
+                const d = document.createElement("div");
+                d.classList.add("cardView")
+                setCard(d, found[i], -1)
+                cardsView.appendChild(d);
+            }
+            cardsUI.showModal()
+        }
+
+        function setCard(div, cardID, cardPos) {
+            div.addEventListener('click', (e) => {
+                showCardInfo(cardID, cardPos);
+            })
+            div.setAttribute("cardID", cardID);
+            div.setAttribute("cardPos", cardPos);
+            div.style.backgroundImage = `url(../Images/${cardID}.jpg)`;
+        }
+
+        function addCard() {
+            curDeck.deck.push(cardInfoView.getAttribute("cardID"))
+            updateBuilder()
+        }
+
+        function removeCard() {
+            const pos = cardInfoView.getAttribute("cardPos")
+            if (pos == -1) alert("덱에 있는 카드만 뺄 수 있습니다")
+            curDeck.deck.splice(pos, 1)
+            cardInfoUI.close()
+            updateBuilder()
+        }
+
+        function saveAs(deckName) {
+            curDeck.name = deckName;
+            if (!deckNames.includes(deckName)) {
+                deckNames.push(deckName)
+                storage.setItem("deckNames", JSON.stringify(deckNames))
+            }
+            storage.setItem(`deck-${deckName}`, JSON.stringify(curDeck))
+            updateBuilder()
+        }
+
+        function deleteDeck() {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            deckNames = deckNames.filter(e => e != curDeck.name)
+            storage.setItem("deckNames", deckName)
+            Location.reload()
+        }
+
+        let curDeck = {
+            leader: "BT01-001",
+            deck: [],
+            name: "noName",
+        }
+
+        const deckList = document.getElementById('deckList')
+        function updateBuilder() {
+            document.getElementById("deckName").innerText = curDeck.name
+            setCard(document.getElementById("leader"), curDeck.leader)
+            while (deckList.firstChild) {
+                deckList.removeChild(deckList.firstChild)
+            }
+            for (i = 0; i < curDeck.deck.length; i++) {
+                const d = document.createElement("div");
+                d.classList.add("cardView")
+                setCard(d, curDeck.deck[i], i)
+                deckList.appendChild(d);
+            }
+        }
+
+        const deckSelectUI = document.getElementById("deckSelectUI")
+        const deckSelector = document.getElementById("deckSelector")
+        function chooseDeck() {
+            const deckNames = JSON.parse(storage.getItem("deckNames"));
+            while (deckSelector.firstChild) {
+                deckSelector.removeChild(deckSelector.firstChild)
+            }
+            for (i = 0; i < deckNames.length; i++) {
+                const o = document.createElement("option");
+                o.setAttribute("value", deckNames[i])
+                o.innerText = deckNames[i]
+                deckSelector.appendChild(o);
+            }
+            deckSelectUI.showModal()
+        }
+        function setDeck() {
+            const deckName = deckSelector.value
+            curDeck = JSON.parse(storage.getItem("deck-" + deckName))
+            updateBuilder()
+            deckSelectUI.close()
+        }
+
+        const cardInfoUI = document.querySelector(".cardInfoUI")
+        const cardInfoView = document.querySelector(".cardInfoUI .cardView")
+        function showCardInfo(cardID, cardPos) {
+            setCard(cardInfoView, cardID, cardPos)
+            cardInfoUI.showModal()
+        }
+    </script>
+</body>
+
+</html>

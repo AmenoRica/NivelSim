@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>니벨Sim 배틀</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game">
+        <div id="enemy" class="field">
+            <div class="deck">
+                <div class="leader"></div>
+                <div class="level">Lv.5 S:10</div>
+                <div class="deckAndTrash">
+                    <button class="deckBtn">덱</button>
+                    <button class="trashBtn">🗑️</button>
+                    <button class="handBtn">패</button>
+                </div>
+            </div>
+            <div class="damage">
+                <button class="damageBtn">데미지(7)</button>
+                <div class="cardZone a">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+                <div class="cardZone b">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+            </div>
+            <div class="skill">
+                <button class="skillBtn">스킬 존</button>
+                <div class="cardZone a">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+                <div class="cardZone b">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+            </div>
+            <div class="unit cardView">
+                <button class="equip">장비</button>
+            </div>
+            <div class="unit cardView">
+                <button class="equip">장비</button>
+            </div>
+            <div class="unit cardView">
+                <button class="equip">장비</button>
+            </div>
+        </div>
+        <div id="player" class="field">
+            <div class="unit cardView p">
+                <button class="atk">⚔️</button>
+                <button class="equip">장비</button>
+                <button class="def">🛡️</button>
+            </div>
+            <div class="unit cardView p">
+                <button class="atk">⚔️</button>
+                <button class="equip">장비</button>
+                <button class="def">🛡️</button>
+            </div>
+            <div class="unit cardView p">
+                <button class="atk">⚔️</button>
+                <button class="equip">장비</button>
+                <button class="def">🛡️</button>
+            </div>
+            <div class="deck">
+                <div class="leader"></div>
+                <div class="level">Lv.5 S:10</div>
+                <div class="deckAndTrash">
+                    <button class="deckBtn">덱</button>
+                    <button class="trashBtn">🗑️</button>
+                    <button class="handBtn">패</button>
+                </div>
+            </div>
+            <div class="damage">
+                <button class="damageBtn">데미지(7)</button>
+                <div class="cardZone a">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+                <div class="cardZone b">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+            </div>
+            <div class="skill">
+                <div>
+                    <button class="skillBtn">스킬 존</button>
+                    <button onclick="trashSkills()">🗑️</button>
+                </div>
+                <div class="cardZone a">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+                <div class="cardZone b">
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                    <div class="cardView"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat">
+            <div class="toolbar">
+                <button onclick="draw()">드로우</button>
+                <button onclick="lvUp()">레벨+</button>
+                <button onclick="awake()">각성 토글</button>
+                <button onclick="deckTop()">덱탑</button>
+                <button onclick="shuffle()">셔플</button>
+            </div>
+            <div class="toolbar">
+                <button onclick="viewDeck()">덱 보기</button>
+                <button onclick="chooseDeck()">덱 선택</button>
+                <button id="openRoom" disabled>방 열기</button>
+                <button id="joinRoom" disabled>연결하기</button>
+                <button onclick="if(confirm('정말 나갈래요?')) location.href = '/'">나가기</button>
+            </div>
+            <textarea id="chatBox" readonly></textarea>
+            <form id="chatui">
+                <input type="text" name="text" class="chatinput" autocomplete='off' />
+                <button class="chatsend">보내기</button>
+            </form>
+        </div>
+        <div id="popupText" class="disabled"></div>
+    </div>
+    <dialog class="cardsui" closedby="any">
+        <div class="cards">
+        </div>
+        <div class="buttons">
+            <button onclick="cardsUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog class="cardInfoUI" closedby="any">
+        <div class="cardView">
+        </div>
+        <div class="buttons h">
+            <button onclick="moveCurTo('deck', true)">덱 아래로</button>
+            <button onclick="moveCurTo('deck', false)">덱 위로</button>
+            <button onclick="moveCurTo('hand', true)">패로</button>
+        </div>
+        <div class="buttons h">
+            <button onclick="moveCurTo('unit0')">1열로</button>
+            <button onclick="moveCurTo('unit1')">2열로</button>
+            <button onclick="moveCurTo('unit2')">3열로</button>
+        </div>
+        <div class="buttons h">
+            <button onclick="moveCurTo('equip0')">1열에 장비</button>
+            <button onclick="moveCurTo('equip1')">2열에 장비</button>
+            <button onclick="moveCurTo('equip2')">3열에 장비</button>
+        </div>
+        <div class="buttons h">
+            <button onclick="moveCurTo('damage', true)">데미지 존으로</button>
+            <button onclick="moveCurTo('skill', true)">스킬 존으로</button>
+            <button onclick="moveCurTo('trash', true)">트래시로</button>
+        </div>
+        <div class="buttons">
+            <button onclick="triggerCard()">발동 선언</button>
+            <button onclick="revealCard()">지목</button>
+            <button onclick="cardInfoUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog id="deckSelectUI" closedby="any">
+        <select id="deckSelector"></select>
+        <div>
+            <button onclick="setDeck()">덱 설정하기</button>
+            <button onclick="deckSelectUI.close()">닫기</button>
+        </div>
+    </dialog>
+    <dialog id="RoomSelectUI" closedby="none">
+        <select id="RoomSelector"></select>
+        <div>
+            <button id="joinRoom2">방 들어가기</button>
+        </div>
+    </dialog>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+    <script src="cardDB.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
