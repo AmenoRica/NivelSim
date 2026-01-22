@@ -524,6 +524,7 @@ function mul(){
     game.player.hand.push(game.player.deck.shift())
     game.player.hand.push(game.player.deck.shift())
     game.player.hand.push(game.player.deck.shift())
+    game.player.hand.push(game.player.deck.shift())
     sendChat("멀리건했습니다.")
     sendGame()
     applyGame()
