@@ -161,7 +161,7 @@
 
             deckNames = deckNames.filter(e => e != curDeck.name)
             storage.setItem("deckNames", deckName)
-            Location.reload()
+            location.href='.'
         }
 
         let curDeck = {
